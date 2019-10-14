@@ -48,6 +48,7 @@ void EthernetServer::accept()
   }
 }
 
+/*
 EthernetClient EthernetServer::available()
 {
   accept();
@@ -65,7 +66,21 @@ EthernetClient EthernetServer::available()
   }
 
   return EthernetClient(MAX_SOCK_NUM);
+}*/
+
+EthernetClient EthernetServer::available_(int sock) {
+  accept_(sock);
+  EthernetClient client(sock);
+  if (EthernetClass::_server_port[sock] == _port &&
+      (client.status() == SnSR::ESTABLISHED ||
+       client.status() == SnSR::CLOSE_WAIT)) {
+    if (client.available()) {
+      return client;
+    }
+  }
+  return EthernetClient(MAX_SOCK_NUM);
 }
+
 
 size_t EthernetServer::write(uint8_t b) 
 {
