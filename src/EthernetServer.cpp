@@ -26,6 +26,15 @@ void EthernetServer::begin()
   }  
 }
 
+void EthernetServer::begin_(int sock) {
+  EthernetClient client(sock);
+  if (client.status() == SnSR::CLOSED) {
+    socket(sock, SnMR::TCP, _port, 0);
+    listen(sock);
+    EthernetClass::_server_port[sock] = _port;
+  }
+}
+/*
 void EthernetServer::accept()
 {
   int listening = 0;
@@ -45,6 +54,25 @@ void EthernetServer::accept()
 
   if (!listening) {
     begin();
+  }
+}*/
+
+void EthernetServer::accept_(int sock) {
+  int listening = 0;
+  EthernetClient client(sock);
+
+  if (EthernetClass::_server_port[sock] == _port) {
+    if (client.status() == SnSR::LISTEN) {
+      listening = 1;
+    } 
+    else if (client.status() == SnSR::CLOSE_WAIT && !client.available()) {
+      client.stop();
+    }
+  } 
+
+  if (!listening) {
+    //begin();
+    begin_(sock); // added
   }
 }
 
@@ -91,9 +119,10 @@ size_t EthernetServer::write(const uint8_t *buffer, size_t size)
 {
   size_t n = 0;
   
-  accept();
+  //accept();
 
   for (int sock = 0; sock < MAX_SOCK_NUM; sock++) {
+    accept_(sock); // added
     EthernetClient client(sock);
 
     if (EthernetClass::_server_port[sock] == _port &&
