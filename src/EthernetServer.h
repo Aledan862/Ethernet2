@@ -14,7 +14,7 @@ private:
 public:
   EthernetServer(uint16_t);
   //EthernetClient available();
-  EthernetClient available_(int sock)
+  EthernetClient available_(int sock);
   virtual void begin();
   virtual void begin_(int sock);
   virtual size_t write(uint8_t);
